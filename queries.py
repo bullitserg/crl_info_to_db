@@ -18,10 +18,10 @@ crlFileLocation = %(crlFileLocation)s,
 delete_server_info_query = '''DELETE FROM crl_info WHERE `server` = %s;'''
 
 
-get_crl_file_location_by_subj_key_id_query = '''SELECT ci.crlFileLocation
+get_crl_file_urls_by_subj_key_id_query = '''
+  SELECT DISTINCT ci.url
   FROM crl_info ci
 WHERE ci.subjKeyId = '%s'
-  LIMIT 1
   ;'''
 
 
@@ -48,4 +48,12 @@ FROM crl_info ci
 WHERE ci.subjKeyId = %s
  AND ci.server = %s
  AND archive = 0
+;'''
+
+
+get_crl_location_by_hash = '''SELECT
+  ci.crlFileLocation
+FROM crl_info ci
+WHERE ci.crlFileHash = '%s'
+LIMIT 1
 ;'''

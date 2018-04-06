@@ -42,22 +42,28 @@ def create_parser():
                         help="Remove old files and records from database for server. Can set --days, --server")
 
     parser.add_argument('-c', '--check_revoke_status', action='store_true',
-                        help="Check revoke status for certificate. Can set --certificate_number, --url / --auth_key")
+                        help='''Check revoke status for certificate. Must set --certificate_number, others:
+                             --url      - check in crl downloads from this url at the moment;
+                             --auth_key - check in all crl downloads from all urls with this auth_key at the moment;
+                             --hash     - check in crl located at db with this hash''')
 
     parser.add_argument('-u', '--update', action='store_true',
                         help="Update records in database. Can set --server")
 
     parser.add_argument('-f', '--fast_update_by_auth_key', action='store_true',
-                        help="Fast update records in database by authKey. Can set --server, --auth_key")
+                        help="Fast update records in database by auth_key. Must set --auth_key, others: --server")
 
     parser.add_argument('-s', '--server', type=int, choices=d_server_list,
                         help="Set server number")
 
-    parser.add_argument('-a', '--auth_key', type=str,
+    parser.add_argument('-k', '--auth_key', type=str,
                         help="Set authKey")
 
     parser.add_argument('-l', '--url', type=str,
                         help="Set url")
+
+    parser.add_argument('-a', '--hash', type=str,
+                        help="Set hash")
 
     parser.add_argument('-n', '--certificate_number', type=str,
                         help="Set certificate_number")
@@ -161,56 +167,75 @@ def crl_updater(server, url):
 
 def check_cert_on_revoke(serial_number, **kwargs):
     """Функция определяет отозванность сертификата по url или authKey crl и возвращает инмормационную строку"""
-    subj_key_id = kwargs.get('subj_key_id', None)
-    if subj_key_id:
-        subj_key_id = subj_key_id.replace(' ', '')
-        crl_file_location = return_value_with_len_check(cn.execute_query(
-            get_crl_file_location_by_subj_key_id_query % subj_key_id),
-            'subj_key_id')
 
-    elif 'url' in kwargs.keys():
-        url = kwargs['url']
+    def download_crl(d_url):
+        print(d_url)
         crl_file_location = join(tmp_dir, 'get_by_url.crl')
         try:
-            response = requests.get(url, timeout=(1, None))
+            response = requests.get(d_url, timeout=(1, None))
             if response.status_code == 200:
                 crl_data = response.content
                 # записываем данные в файл
                 with open(crl_file_location, mode='wb') as crl_out_f:
                     crl_out_f.write(crl_data)
             else:
+                print(response.status_code)
                 print('Невозможно загрузить файл по ссылке %s' % url)
                 exit(1)
-        except requests.exceptions.RequestException:
+        except requests.exceptions.RequestException as e:
             print('Невозможно загрузить файл по ссылке %s' % url)
+            print(e)
+            exit(1)
+        return crl_file_location
+
+    def checking(crl_file_l):
+        try:
+            crl = Crl(crl_file_l, timezone=timezone)
+            revoked_d = crl.get_revoked_certs_info(certificate_serial=serial_number)
+            if revoked_d:
+                print('''Сертификат "%s" отозван %s по причине "%s" ''' % (serial_number,
+                                                                           revoked_d['revoke_date'],
+                                                                           revoked_d['reason']))
+            else:
+                print('Сертификат "%s" не отзывался' % serial_number)
+
+            crl_info = crl.compile_info_v5()
+            this_update = crl_info.get_this_update_datetime()
+            next_update = crl_info.get_next_update_datetime()
+
+            if not this_update <= datetime.now() <= next_update:
+                print('Срок действия Crl: с %s по %s (НЕ АКТУАЛЕН)' % (this_update, next_update))
+            else:
+                print('Срок действия Crl: с %s по %s (АКТУАЛЕН)' % (this_update, next_update))
+
+        except Crypto_error:
+            print('Ошибка обработки SSL crypto')
+            exit(1)
+        except ImportError:
+            print('Превышен допустимый размер файла')
             exit(1)
 
-    try:
-        crl = Crl(crl_file_location, timezone=timezone)
-        revoked_d = crl.get_revoked_certs_info(certificate_serial=serial_number)
-        if revoked_d:
-            print('''Сертификат "%s" отозван %s по причине "%s" ''' % (serial_number,
-                                                                       revoked_d['revoke_date'],
-                                                                       revoked_d['reason']))
-        else:
-            print('Сертификат "%s" не отзывался' % serial_number)
+    # ##########
+    if 'subj_key_id' in kwargs.keys():
+        subj_key_id = kwargs['subj_key_id'].replace(' ', '')
+        crl_file_urls = cn.execute_query(
+            get_crl_file_urls_by_subj_key_id_query % subj_key_id)
+        for crl_file_url in crl_file_urls:
+            crl_file_url = crl_file_url[0]
+            crl_file_location = download_crl(crl_file_url)
+            checking(crl_file_location)
+            print('\n')
 
-        crl_info = crl.compile_info_v5()
-        this_update = crl_info.get_this_update_datetime()
-        next_update = crl_info.get_next_update_datetime()
+    elif 'url' in kwargs.keys():
+        url = kwargs['url']
+        crl_file_location = download_crl(url)
+        checking(crl_file_location)
 
-        if not this_update <= datetime.now() <= next_update:
-            print('Срок действия Crl: с %s по %s (НЕ АКТУАЛЕН)' % (this_update, next_update))
-        else:
-            print('Срок действия Crl: с %s по %s (АКТУАЛЕН)' % (this_update, next_update))
-        exit(0)
-
-    except Crypto_error:
-        print('Ошибка обработки SSL crypto')
-        exit(1)
-    except ImportError:
-        print('Превышен допустимый размер файла')
-        exit(1)
+    elif 'hash' in kwargs.keys():
+        c_hash = kwargs['hash']
+        crl_file_location = return_value_with_len_check(cn.execute_query(get_crl_location_by_hash % c_hash),
+                                                        'Hash')
+        checking(crl_file_location)
 
 
 def delete_old_data(server, days):
@@ -253,8 +278,8 @@ if __name__ == '__main__':
                 print('Не указан certificate_number')
                 exit(1)
 
-            if not (namespace.url or namespace.auth_key):
-                print('Требуется указать url или auth_key')
+            if not (namespace.url or namespace.auth_key or namespace.hash):
+                print('Требуется указать url, auth_key или hash')
                 exit(1)
 
             elif namespace.url:
@@ -263,6 +288,10 @@ if __name__ == '__main__':
 
             elif namespace.auth_key:
                 check_cert_on_revoke(namespace.certificate_number, subj_key_id=namespace.auth_key)
+                exit(0)
+
+            elif namespace.hash:
+                check_cert_on_revoke(namespace.certificate_number, hash=namespace.hash)
                 exit(0)
 
         if namespace.remove:
@@ -297,6 +326,10 @@ if __name__ == '__main__':
                 exit(0)
 
         if namespace.fast_update_by_auth_key:
+            if not namespace.auth_key:
+                print('Не указан auth_key')
+                exit(1)
+
             if namespace.server:
                 u_server_list.append(namespace.server)
             else:
