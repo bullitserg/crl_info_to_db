@@ -36,40 +36,52 @@ def create_parser():
     parser = argparse.ArgumentParser(description=DESCRIPTION)
 
     parser.add_argument('-v', '--version', action='store_true',
-                        help="Show version")
-
-    parser.add_argument('-r', '--remove', action='store_true',
-                        help="Remove old files and records from database for server. Can set --days, --server")
-
-    parser.add_argument('-c', '--check_revoke_status', action='store_true',
-                        help='''Check revoke status for certificate. Must set --certificate_number, others:
-                             --url      - check in crl downloads from this url at the moment;
-                             --auth_key - check in all crl downloads from all urls with this auth_key at the moment;
-                             --hash     - check in crl located at db with this hash''')
+                        help="Показать версию программы")
 
     parser.add_argument('-u', '--update', action='store_true',
-                        help="Update records in database. Can set --server")
+                        help='''Обновить записи в базе данных.
+                        Аргументы:
+                        --server - обновить для указанного сервера (необязательный)''')
 
     parser.add_argument('-f', '--fast_update_by_auth_key', action='store_true',
-                        help="Fast update records in database by auth_key. Must set --auth_key, others: --server")
+                        help='''Быстрое обновление данных по auth_key.
+                        Аргументы:
+                        --auth_key - идентификатор (обязательный);
+                        --server - обновить для указанного сервера (необязательный)''')
+
+    parser.add_argument('-r', '--remove', action='store_true',
+                        help='''Удалить устаревшие записи.
+                        Аргументы:
+                        --server - удалить для указанного сервера (необязательный);
+                        --days - за указанное количество дней (по умолчанию 10, необязательный)''')
+
+    parser.add_argument('-c', '--check_revoke_status', action='store_true',
+                        help='''Проверка статуса отзыва для сертификата.
+                        Аргументы:
+                        --certificate_number - номер сертификата (обязательный).
+                        Типы проверки:
+                        --url - проверяет по конкретному url, всегда подгружается свежий crl;
+                        --auth_key - проверка по всем свежим crl, загруженным по ссылкам,
+                        соответствующим указанному auth_key;
+                        --hash - проверка по crl файлу, хранящемуся в БД с указанным md5-хэшем''')
 
     parser.add_argument('-s', '--server', type=int, choices=d_server_list,
-                        help="Set server number")
+                        help="Установить номер сервера")
 
     parser.add_argument('-k', '--auth_key', type=str,
-                        help="Set authKey")
+                        help="Установить auth_key")
 
     parser.add_argument('-l', '--url', type=str,
-                        help="Set url")
+                        help="Установить url")
 
     parser.add_argument('-a', '--hash', type=str,
-                        help="Set hash")
+                        help="Установить md5-хеш")
 
     parser.add_argument('-n', '--certificate_number', type=str,
-                        help="Set certificate_number")
+                        help="Установить номер сертификата")
 
     parser.add_argument('-d', '--days', type=int,
-                        help="Set days count")
+                        help="Установить количество дней")
 
     return parser
 
