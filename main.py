@@ -112,14 +112,8 @@ def get_and_parse_crl_url_file(server):
 
 
 def crl_updater(server, url):
-    info_data = {}
-    # забиваем info_data пустыми данными NULL
-    for key in ('lastUrlModificationDatetime', 'crl_CN', 'crl_O', 'subjKeyId',
-                'thisUpdateDatetime', 'nextUpdateDatetime', 'crlFileHash', 'crlFileName', 'crlFileLocation'):
-        info_data[key] = NULL
 
-    info_data['server'] = value_former(server)
-    info_data['url'] = value_former(url)
+    info_data = {'server': value_former(server), 'url': value_former(url)}
 
     try:
         # скачиваем Crl
@@ -172,6 +166,12 @@ def crl_updater(server, url):
         info_data['status'] = value_former('crypto_error')
     except ImportError:
         info_data['status'] = value_former('file_size_error')
+
+    # забиваем info_data пустыми данными NULL, в том числе, если там None или что то подобное, возвращающее False
+    for key in ('lastUrlModificationDatetime', 'crl_CN', 'crl_O', 'subjKeyId',
+                'thisUpdateDatetime', 'nextUpdateDatetime', 'crlFileHash', 'crlFileName', 'crlFileLocation'):
+        if not info_data.get(key, False):
+            info_data[key] = NULL
 
 #    print(info_data)
     cn.execute_query(insert_crl_info_query % info_data)
