@@ -171,7 +171,7 @@ def crl_updater(server, url):
     for key in ('lastUrlModificationDatetime', 'crl_CN', 'crl_O', 'subjKeyId',
                 'thisUpdateDatetime', 'nextUpdateDatetime', 'crlFileHash', 'crlFileName', 'crlFileLocation'):
         value = info_data.get(key, False)
-        if (not value) or (value == 'False') or (value == 'None'):
+        if (not value) or (value == "'False'") or (value == "'None'"):
             info_data[key] = NULL
 
 #    print(info_data)
