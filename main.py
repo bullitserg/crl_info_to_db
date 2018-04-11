@@ -100,7 +100,7 @@ def return_value_with_len_check(iter_data, value_text):
 
 def get_and_parse_crl_url_file(server):
     """Функция для получения url и"""
-    get_crl_point_file(server, out_dir=tmp_dir)
+#    get_crl_point_file(server, out_dir=tmp_dir)
     crl_urls_f = join(tmp_dir, 'crl_points_%s.txt' % server)
 
     with open(crl_urls_f, mode='r', encoding='utf8') as crl_urls_o:
@@ -112,14 +112,8 @@ def get_and_parse_crl_url_file(server):
 
 
 def crl_updater(server, url):
-    info_data = {}
-    # забиваем info_data пустыми данными NULL
-    for key in ('lastUrlModificationDatetime', 'crl_CN', 'crl_O', 'subjKeyId',
-                'thisUpdateDatetime', 'nextUpdateDatetime', 'crlFileHash', 'crlFileName', 'crlFileLocation'):
-        info_data[key] = NULL
 
-    info_data['server'] = value_former(server)
-    info_data['url'] = value_former(url)
+    info_data = {'server': value_former(server), 'url': value_former(url)}
 
     try:
         # скачиваем Crl
@@ -172,6 +166,13 @@ def crl_updater(server, url):
         info_data['status'] = value_former('crypto_error')
     except ImportError:
         info_data['status'] = value_former('file_size_error')
+
+    # забиваем info_data пустыми данными NULL, в том числе, если там None или что то подобное, возвращающее False
+    for key in ('lastUrlModificationDatetime', 'crl_CN', 'crl_O', 'subjKeyId',
+                'thisUpdateDatetime', 'nextUpdateDatetime', 'crlFileHash', 'crlFileName', 'crlFileLocation'):
+        value = info_data.get(key, False)
+        if not value or value == 'False' or value == 'None':
+            info_data[key] = NULL
 
 #    print(info_data)
     cn.execute_query(insert_crl_info_query % info_data)
