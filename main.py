@@ -170,7 +170,8 @@ def crl_updater(server, url):
     # забиваем info_data пустыми данными NULL, в том числе, если там None или что то подобное, возвращающее False
     for key in ('lastUrlModificationDatetime', 'crl_CN', 'crl_O', 'subjKeyId',
                 'thisUpdateDatetime', 'nextUpdateDatetime', 'crlFileHash', 'crlFileName', 'crlFileLocation'):
-        if not info_data.get(key, False):
+        value = info_data.get(key, False)
+        if not value or value == 'False' or value == 'None':
             info_data[key] = NULL
 
 #    print(info_data)
@@ -361,5 +362,6 @@ if __name__ == '__main__':
         exit(1)
 
     exit(0)
+
 
 
