@@ -100,7 +100,7 @@ def return_value_with_len_check(iter_data, value_text):
 
 def get_and_parse_crl_url_file(server):
     """Функция для получения url и"""
-#    get_crl_point_file(server, out_dir=tmp_dir)
+    get_crl_point_file(server, out_dir=tmp_dir)
     crl_urls_f = join(tmp_dir, 'crl_points_%s.txt' % server)
 
     with open(crl_urls_f, mode='r', encoding='utf8') as crl_urls_o:
