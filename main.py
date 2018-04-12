@@ -346,7 +346,7 @@ if __name__ == '__main__':
                     bar.update(u_status)
                 bar.finish()
 
-                print('Обработка завершена')
+            print('Обработка завершена')
             exit(0)
 
         if namespace.fast_update_by_auth_key:
