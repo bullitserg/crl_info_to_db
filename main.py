@@ -2,6 +2,7 @@ import re
 import requests
 import argparse
 import logger_module
+import progressbar
 from os.path import normpath, join
 from os import remove
 from hashlib import md5
@@ -174,7 +175,6 @@ def crl_updater(server, url):
         if (not value) or (value == "'False'") or (value == "'None'"):
             info_data[key] = NULL
 
-#    print(info_data)
     cn.execute_query(insert_crl_info_query % info_data)
 
 
@@ -331,10 +331,21 @@ if __name__ == '__main__':
                 u_server_list = d_server_list
 
             for server in u_server_list:
-                print('Обработка сервера %s' % server)
                 url_l = get_and_parse_crl_url_file(server)
+
+                u_status = 0
+                bar = progressbar.ProgressBar(maxval=len(url_l), widgets=[
+                    'Обработка сервера %s' % server,
+                    progressbar.Bar(left=' [', marker='#', right='] '),
+                    progressbar.SimpleProgress(),
+                ]).start()
+
                 for url in url_l:
                     crl_updater(server, url)
+                    u_status += 1
+                    bar.update(u_status)
+                bar.finish()
+
                 print('Обработка завершена')
             exit(0)
 
