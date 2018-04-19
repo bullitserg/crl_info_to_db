@@ -29,7 +29,7 @@ WHERE ci.subjKeyId = '%s'
 get_file_locations_for_delete_query = '''SELECT
   ci.crlFileLocation
 FROM crl_info ci
- WHERE ci.insertDatetime < SUBDATE(DATE(NOW()), INTERVAL %s DAY)
+ WHERE ci.insertDatetime < SUBDATE(DATE(NOW()), INTERVAL %s MINUTE)
  AND `server` = %s
  AND noDelete = 0
  AND archive = 0
@@ -37,7 +37,7 @@ FROM crl_info ci
 
 delete_old_bd_record_query = '''DELETE
   FROM crl_info
- WHERE insertDatetime < SUBDATE(DATE(NOW()), INTERVAL %s DAY)
+ WHERE insertDatetime < SUBDATE(DATE(NOW()), INTERVAL %s MINUTE)
  AND `server` = %s
  AND noDelete = 0
  AND archive = 0

@@ -185,16 +185,16 @@ def check_cert_on_revoke(serial_number, **kwargs):
         checking(crl_file_location)
 
 
-def delete_old_data(server, days):
-    print('Удаление данных старше %s дней для сервера %s' % (days, server))
-    locations = cn.execute_query(get_file_locations_for_delete_query, days, server)
+def delete_old_data(server, minutes):
+    print('Удаление данных старее %s минут для сервера %s' % (minutes, server))
+    locations = cn.execute_query(get_file_locations_for_delete_query, minutes, server)
     if locations:
         for location in locations:
             try:
                 remove(location[0])
             except:
                 pass
-            cn.execute_query(delete_old_bd_record_query, days, server)
+            cn.execute_query(delete_old_bd_record_query, minutes, server)
 
 
 def update_crl_info_by_auth_id(server, auth_key):

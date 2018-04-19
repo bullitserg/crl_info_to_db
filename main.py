@@ -41,7 +41,7 @@ def create_parser():
                         help='''Удалить устаревшие записи.
                         Аргументы:
                         --server - удалить для указанного сервера (необязательный);
-                        --days - за указанное количество дней (по умолчанию 10, необязательный)''')
+                        --minutes - старее, чем minutes минут (по умолчанию 0, необязательный)''')
 
     parser.add_argument('-c', '--check_revoke_status', action='store_true',
                         help='''Проверка статуса отзыва для сертификата.
@@ -71,8 +71,8 @@ def create_parser():
     parser.add_argument('-n', '--certificate_number', type=str,
                         help="Установить номер сертификата")
 
-    parser.add_argument('-d', '--days', type=int,
-                        help="Установить количество дней")
+    parser.add_argument('-m', '--minutes', type=int,
+                        help="Установить количество минут")
 
     return parser
 
@@ -115,13 +115,13 @@ if __name__ == '__main__':
             else:
                 u_server_list = d_server_list
 
-            if namespace.days:
-                days = namespace.days
+            if namespace.minutes:
+                minutes = namespace.minutes
             else:
-                days = d_days
+                minutes = d_minutes
 
             for server in u_server_list:
-                delete_old_data(server, days)
+                delete_old_data(server, minutes)
 
             print('Данные удалены')
             exit(0)
