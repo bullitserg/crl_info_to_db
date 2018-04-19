@@ -12,7 +12,8 @@ url = %(url)s,
 crlFileName = %(crlFileName)s,
 crlFileLocation = %(crlFileLocation)s,
 `crlFileHash` = %(crlFileHash)s,
-`status` = %(status)s
+`status` = %(status)s,
+template = %(template)s
   ;'''
 
 delete_server_info_query = '''DELETE FROM crl_info WHERE `server` = %s;'''

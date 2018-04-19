@@ -22,6 +22,7 @@ AUTHOR = 'Belim S.'
 RELEASE_DATE = '2018-04-05'
 
 u_server_list = []
+template = 0
 
 tmp_dir = normpath(tmp_dir)
 cn = mc(connection=mc.MS_CERT_INFO_CONNECT)
@@ -42,7 +43,9 @@ def create_parser():
     parser.add_argument('-u', '--update', action='store_true',
                         help='''Обновить записи в базе данных.
                         Аргументы:
-                        --server - обновить для указанного сервера (необязательный)''')
+                        --server - обновить для указанного сервера (необязательный)
+                        --template - установить как шаблон, удобно для последующей
+                        работы с --fast_update_by_auth_key''')
 
     parser.add_argument('-f', '--fast_update_by_auth_key', action='store_true',
                         help='''Быстрое обновление данных по auth_key.
@@ -68,6 +71,9 @@ def create_parser():
 
     parser.add_argument('-s', '--server', type=int, choices=d_server_list,
                         help="Установить номер сервера")
+
+    parser.add_argument('-t', '--template', action='store_true',
+                        help="Записать как шаблон")
 
     parser.add_argument('-k', '--auth_key', type=str,
                         help="Установить auth_key")
@@ -114,7 +120,9 @@ def get_and_parse_crl_url_file(server):
 
 def crl_updater(server, url):
 
-    info_data = {'server': value_former(server), 'url': value_former(url)}
+    info_data = {'server': value_former(server),
+                 'url': value_former(url),
+                 'template': template}
 
     try:
         # скачиваем Crl
@@ -325,6 +333,10 @@ if __name__ == '__main__':
             exit(0)
 
         if namespace.update:
+
+            if namespace.template:
+                template = 1
+
             if namespace.server:
                 u_server_list.append(namespace.server)
             else:
