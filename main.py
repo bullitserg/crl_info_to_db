@@ -11,7 +11,7 @@ AUTHOR = 'Belim S.'
 RELEASE_DATE = '2018-04-05'
 
 u_server_list = []
-
+template = 0
 
 def show_version():
     print(PROGNAME, VERSION, '\n', DESCRIPTION, '\nAuthor:', AUTHOR, '\nRelease date:', RELEASE_DATE)
@@ -147,7 +147,7 @@ if __name__ == '__main__':
                 ]).start()
 
                 for url in url_l:
-                    crl_updater(server, url)
+                    crl_updater(server, url, template)
                     u_status += 1
                     bar.update(u_status)
                 bar.finish()

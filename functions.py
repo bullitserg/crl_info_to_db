@@ -12,7 +12,6 @@ from os.path import normpath, join
 from ets.ets_mysql_lib import MysqlConnection as mc
 from config import *
 
-template = 0
 tmp_dir = normpath(tmp_dir)
 
 cn = mc(connection=mc.MS_CERT_INFO_CONNECT)
@@ -44,7 +43,7 @@ def get_and_parse_crl_url_file(server):
     return crl_urls
 
 
-def crl_updater(server, url):
+def crl_updater(server, url, template):
 
     info_data = {'server': value_former(server),
                  'url': value_former(url),
