@@ -50,6 +50,7 @@ delete_old_bd_record_query = '''DELETE
  AND `server` = %s
  AND noDelete = 0
  AND archive = 0
+ AND template = 0
 ;'''
 
 get_urls_by_subj_key_and_server = '''SELECT
