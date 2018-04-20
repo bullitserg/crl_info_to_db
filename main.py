@@ -350,7 +350,8 @@ if __name__ == '__main__':
             for server in u_server_list:
 
                 url_l = get_and_parse_crl_url_file(server)
-                cn.execute_query(crl_data_drop_template, server)
+                if template:
+                    cn.execute_query(crl_data_drop_template, server)
 
                 u_status = 0
                 bar = progressbar.ProgressBar(maxval=len(url_l), widgets=[
