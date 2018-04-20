@@ -64,5 +64,5 @@ crl_data_drop_template = '''UPDATE crl_info ci
 SET ci.template = 0
 WHERE ci.template = 1
   AND ci.noDelete = 0
-AND cd.`server` = %s
+AND ci.`server` = %s
 ;'''
