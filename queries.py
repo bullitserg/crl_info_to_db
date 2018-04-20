@@ -58,3 +58,11 @@ FROM crl_info ci
 WHERE ci.crlFileHash = '%s'
 LIMIT 1
 ;'''
+
+
+crl_data_drop_template = '''UPDATE crl_info ci
+SET ci.template = 0
+WHERE ci.template = 1
+  AND ci.noDelete = 0
+AND cd.`server` = %s
+;'''
