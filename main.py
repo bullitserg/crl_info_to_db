@@ -13,6 +13,7 @@ RELEASE_DATE = '2018-04-05'
 u_server_list = []
 template = 0
 
+
 def show_version():
     print(PROGNAME, VERSION, '\n', DESCRIPTION, '\nAuthor:', AUTHOR, '\nRelease date:', RELEASE_DATE)
 
@@ -123,7 +124,10 @@ if __name__ == '__main__':
             for server in u_server_list:
                 delete_old_data(server, minutes)
 
-            print('Данные удалены')
+            info = 'Сведения за %s минут удалены' % minutes
+            print(info)
+            logger.info(info)
+
             exit(0)
 
         if namespace.update:
@@ -152,7 +156,10 @@ if __name__ == '__main__':
                     bar.update(u_status)
                 bar.finish()
 
-            print('Обработка завершена')
+            info = 'Данные обновлены'
+            print(info)
+            logger.info(info)
+
             exit(0)
 
         if namespace.fast_update_by_auth_key:
@@ -166,6 +173,10 @@ if __name__ == '__main__':
                 u_server_list = d_server_list
             for server in u_server_list:
                 update_crl_info_by_auth_id(server, namespace.auth_key)
+
+            info = 'Выполнено быстрое обновление по auth_key "%s"' % namespace.auth_key
+            logger.info(info)
+
             exit(0)
 
         else:

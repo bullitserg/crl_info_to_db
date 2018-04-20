@@ -12,6 +12,8 @@ logging.basicConfig(format=l_p.LOG_FORMAT_1,
                     level=logging.INFO,
                     filename=log_file)
 
+logging.getLogger("paramiko.transport").setLevel(logging.ERROR)
+
 
 # описываем функцию, которая будет возвращать логгер с нужным именем
 # (названием главной функции, в которой произошло событие)
