@@ -263,7 +263,7 @@ def check_cert_on_revoke(serial_number, **kwargs):
 
 def delete_old_data(server, minutes):
     print('Удаление данных старее %s минут для сервера %s' % (minutes, server))
-    locations = cn.execute_query(get_file_locations_for_delete_query, minutes, server)
+    locations = cn.execute_query(get_file_locations_for_delete_query, minutes, server, minutes, server)
     if locations:
         for location in locations:
             try:

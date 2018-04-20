@@ -29,11 +29,20 @@ WHERE ci.subjKeyId = '%s'
 get_file_locations_for_delete_query = '''SELECT
   ci.crlFileLocation
 FROM crl_info ci
- WHERE ci.insertDatetime < SUBDATE(NOW(), INTERVAL %s MINUTE)
- AND `server` = %s
- AND noDelete = 0
- AND archive = 0
-;'''
+WHERE ci.insertDateTime < SUBDATE(NOW(), INTERVAL %s MINUTE)
+AND ci.crlFileLocation IS NOT NULL
+AND ci.server = %s
+AND noDelete = 0
+AND archive = 0
+AND ci.template = 0
+AND ci.crlFileLocation NOT IN (SELECT
+    ci.crlFileLocation
+  FROM crl_info ci
+  WHERE (ci.insertDateTime >= SUBDATE(NOW(), INTERVAL %s MINUTE)
+  OR ci.template = 1)
+  AND ci.server = %s
+  AND ci.crlFileLocation IS NOT NULL
+  AND archive = 0);'''
 
 delete_old_bd_record_query = '''DELETE
   FROM crl_info
