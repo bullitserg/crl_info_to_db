@@ -1,12 +1,11 @@
 import argparse
 import logger_module
 import progressbar
-import re
 import requests
 from os import remove
 from hashlib import md5
 from ets.ets_certificate_lib import Crl
-from ets.ets_certmanager_logs_parser import get_crl_point_file
+from ets.ets_certmanager_logs_parser import get_and_parse_crl_url_file
 from datetime import datetime, timedelta
 from OpenSSL.crypto import Error as Crypto_error
 from queries import *
@@ -105,19 +104,6 @@ def return_value_with_len_check(iter_data, value_text):
     elif iter_data_len > 0:
         print('Найдено несколько значений %s: %s' % (value_text, iter_data))
     exit(1)
-
-
-def get_and_parse_crl_url_file(server):
-    """Функция для получения url и"""
-    get_crl_point_file(server, out_dir=tmp_dir)
-    crl_urls_f = join(tmp_dir, 'crl_points_%s.txt' % server)
-
-    with open(crl_urls_f, mode='r', encoding='utf8') as crl_urls_o:
-        crl_urls_r = crl_urls_o.read()
-
-    crl_urls = re.findall(r'http:.*?\.crl', crl_urls_r)
-
-    return crl_urls
 
 
 def crl_updater(server, url, template):
@@ -349,7 +335,7 @@ if __name__ == '__main__':
 
             for server in u_server_list:
 
-                url_l = get_and_parse_crl_url_file(server)
+                url_l = get_and_parse_crl_url_file(server, out_dir=tmp_dir)
                 if template:
                     cn.execute_query(crl_data_drop_template, server)
 
