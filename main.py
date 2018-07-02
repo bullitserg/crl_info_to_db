@@ -114,7 +114,7 @@ def crl_updater(server, url, template):
 
     try:
         # скачиваем Crl
-        response = requests.get(url, timeout=(1, None))
+        response = requests.get(url, timeout=(1, 30))
         if response.status_code == 200:
             info_data['status'] = value_former('success')
 
